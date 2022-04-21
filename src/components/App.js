@@ -14,10 +14,21 @@ class App extends React.Component {
 
   componentDidMount() {
     const { params } = this.props.match;
+    const localStorageRef = localStorage.getItem(params.restaurantId)
+    if (localStorageRef) {
+      this.setState({ order: JSON.parse(localStorageRef) })
+    }
+
+
     this.ref = base.syncState(`${params.restaurantId}/burgers`, {
       context: this,
       state: 'burgers'
     })
+  }
+
+  componentDidUpdate() {
+    const { params } = this.props.match;
+    localStorage.setItem(params.restaurantId, JSON.stringify(this.state.order))
   }
 
   componentWillUnmount() {
@@ -34,12 +45,21 @@ class App extends React.Component {
     this.setState({ burgers })
   }
 
+  updateBurger = (key, updateBurger) => {
+    // 1 Делаем копию объекта state
+    const burgers = { ...this.state.burgers }
+    // 2. обновляем нужный Бургер
+    burgers[key] = updateBurger
+    // 3. записать обновленный бургер в объект в state
+    this.setState({ burgers })
+  }
+
   loadSampleBurgers = () => {
     this.setState({ burgers: sampleBurgers })
   }
 
   addToOrder = (key) => {
-    // 1. Ltkftv rjgb. j,]trnf ыефеу
+    // 1. Делаем копию объекта state
     const order = { ...this.state.order }
     // Добавить ключ к заказу со значением 1 либо обновить текущее значение
     order[key] = order[key] + 1 || 1;
@@ -67,6 +87,8 @@ class App extends React.Component {
         {/* <Order {...this.state} /> сокращённый вариант написания */}
         <MenuAdmin addBurger={this.addBurger}
           loadSampleBurgers={this.loadSampleBurgers}
+          burgers={this.state.burgers}
+          updateBurger={this.updateBurger}
         />
       </div>
     )
